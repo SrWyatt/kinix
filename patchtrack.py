@@ -1,4 +1,3 @@
-# patchtrack.py
 import requests
 import argparse
 import sys
@@ -10,7 +9,7 @@ def check_package_version(package_name, current_version):
     try:
         print(f"[INFO] Verificando {package_name} (Versión actual: {current_version})...")
         response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
-        response.raise_for_status() # Lanza un error si la solicitud falla
+        response.raise_for_status() 
         
         latest_version = response.json()['info']['version']
         
