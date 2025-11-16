@@ -1,4 +1,3 @@
-# golem.py
 import argparse
 import sys
 try:
@@ -16,14 +15,12 @@ def discover_hosts(network_range):
     
     # Crear el paquete ARP request
     arp_request = ARP(pdst=network_range)
-    # Crear el frame de Ethernet (broadcast)
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     
     packet = broadcast / arp_request
     
     try:
-        # Enviar el paquete y recibir respuestas
-        # srp = Send and Receive Packet
+     
         result = srp(packet, timeout=3, verbose=0)[0]
         
         clients = []
@@ -48,12 +45,12 @@ if __name__ == "__main__":
     parser.add_argument("network", help="El rango de red a escanear (ej: 192.168.1.0/24)")
     args = parser.parse_args()
     
-    # Scapy a menudo requiere privilegios de administrador para enviar paquetes
+
     import os
     if os.name == 'posix' and os.geteuid() != 0:
         print("[ADVERTENCIA] Este script funciona mejor si se ejecuta como 'root' (sudo).")
     elif os.name == 'nt':
-        # En Windows, es más difícil verificar si es admin desde CLI
+      
         print("[ADVERTENCIA] Asegúrate de ejecutar este script en un terminal 'Como Administrador'.")
 
     discover_hosts(args.network)
