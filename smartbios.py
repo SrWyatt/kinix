@@ -1,12 +1,10 @@
-# smartbios.py
 import subprocess
 import platform
 import os
 
 def check_bios_features():
     """
-    Intenta verificar características de seguridad de la BIOS/UEFI.
-    Esto es solo una DEMO conceptual y depende mucho del SO.
+    Verificar características de seguridad de la BIOS/UEFI.
     """
     system = platform.system()
     print(f"[INFO] Sistema operativo detectado: {system}")
@@ -14,13 +12,13 @@ def check_bios_features():
 
     if system == "Linux":
         print("Verificando SecureBoot (Linux)...")
-        # En Linux, se puede verificar la existencia de archivos en /sys/firmware/efi
+        
         try:
-            # Un tamaño de fw_platform_size de 64 bits usualmente indica UEFI
+          
             result = subprocess.run(['cat', '/sys/firmware/efi/fw_platform_size'], capture_output=True, text=True, check=True)
             print(f"  - Modo UEFI detectado (Plataforma de {result.stdout.strip()} bits).")
             
-            # Verificar SecureBoot
+            
             sb_result = subprocess.run(['mokutil', '--sb-state'], capture_output=True, text=True)
             if sb_result.returncode == 0:
                 print(f"  - Estado de SecureBoot: {sb_result.stdout.strip()}")
@@ -33,9 +31,9 @@ def check_bios_features():
 
     elif system == "Windows":
         print("Verificando SecureBoot (Windows con PowerShell)...")
-        # En Windows, se usa PowerShell o WMI
+    
         try:
-            # Intenta ejecutar un comando de PowerShell
+     
             result = subprocess.run(
                 ["powershell", "Confirm-SecureBootUEFI"], 
                 capture_output=True, text=True, shell=True
