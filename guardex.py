@@ -1,4 +1,3 @@
-# guardex.py
 import argparse
 import hashlib
 import sys
@@ -15,7 +14,7 @@ def calculate_hash(file_path):
     sha256_hash = hashlib.sha256()
     try:
         with open(file_path, "rb") as f:
-            # Leer el archivo en bloques para no consumir mucha RAM
+          
             for byte_block in iter(lambda: f.read(4096), b""):
                 sha256_hash.update(byte_block)
             print(f"SHA-256 de {file_path}:")
