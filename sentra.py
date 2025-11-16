@@ -1,4 +1,3 @@
-# sentra.py
 import requests
 import hashlib
 import sys
@@ -7,21 +6,21 @@ import getpass
 import os
 import platform
 
-# Importar y Inicializar Colorama
+
 try:
     import colorama
     from colorama import Fore, Style
     colorama.init(autoreset=True)
 except ImportError:
     print("Por favor instala 'colorama': pip install colorama")
-    # Definir colores 'dummy' si colorama no está
+    
     class DummyColor:
         def __getattr__(self, name):
             return ""
     Fore = DummyColor()
     Style = DummyColor()
 
-# --- Definición de Colores ---
+
 C_RED = Fore.RED + Style.BRIGHT
 C_GREEN = Fore.GREEN + Style.BRIGHT
 C_YELLOW = Fore.YELLOW + Style.BRIGHT
@@ -29,7 +28,7 @@ C_CYAN = Fore.CYAN + Style.BRIGHT
 C_WHITE = Fore.WHITE + Style.BRIGHT
 C_RESET = Style.RESET_ALL
 
-# --- Funciones de Gráficos ---
+
 
 def create_risk_bar(count):
     """
@@ -54,7 +53,6 @@ def create_risk_bar(count):
     print(f"  Nivel de Riesgo: {color}[{bar}]{C_RESET}")
     print(f"  Evaluación:      {color}{message}{C_RESET}")
 
-# --- Función Principal de Verificación ---
 
 def check_pwned_password(password):
     """
@@ -62,23 +60,22 @@ def check_pwned_password(password):
     """
     count = 0
     try:
-        # 1. Hashear la contraseña con SHA-1
+        #Hashear la contraseña con SHA-1
         sha1_password = hashlib.sha1(password.encode('utf-8')).hexdigest().upper()
         prefix, suffix = sha1_password[:5], sha1_password[5:]
         
-        # 2. Enviar solo el prefijo a la API
+     
         print(f"\n{C_CYAN}[INFO] Consultando base de datos de brechas (K-Anonymity)...{C_RESET}")
         response = requests.get(f"https://api.pwnedpasswords.com/range/{prefix}")
         response.raise_for_status()
         
-        # 3. Comprobar el sufijo en la respuesta
+        
         hashes = (line.split(':') for line in response.text.splitlines())
         for h, c in hashes:
             if h == suffix:
                 count = int(c)
-                break # Encontrado, salimos del bucle
+                break 
         
-        # 4. Mostrar resultados (fuera del bucle)
         print(f"{C_GREEN}==================================================={C_RESET}")
         print(f"{C_WHITE}--- Evaluación de la Contraseña (Sentra) ---{C_RESET}")
         
@@ -97,7 +94,6 @@ def check_pwned_password(password):
     except Exception as e:
         print(f"\n{C_RED}[ERROR] Ocurrió un error inesperado: {e}{C_RESET}")
 
-# --- Bloque de Ejecución ---
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sentra: Verifica si una contraseña ha sido comprometida.")
