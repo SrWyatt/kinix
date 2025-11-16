@@ -1,4 +1,3 @@
-# securedocs.py
 import yara
 import argparse
 import sys
@@ -6,7 +5,7 @@ import os
 import datetime
 from mimetypes import guess_type
 
-# --- Importaciones especializadas ---
+
 try:
     # Para .jpg, .tif (EXIF)
     import exifread
@@ -61,7 +60,6 @@ def scan_file_yara(file_path):
     print("------------------------------------")
     return is_safe
 
-# --- 2. MÓDULO DE METADATOS (ESPECIALIZADO) ---
 
 def _print_meta(key, value):
     """Ayudante para imprimir metadatos de forma limpia."""
