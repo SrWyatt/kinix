@@ -1,4 +1,3 @@
-# syscare.py
 import psutil
 import datetime
 import platform
@@ -6,21 +5,21 @@ import subprocess
 import re
 import os
 
-# Importar y Inicializar Colorama
+
 try:
     import colorama
     from colorama import Fore, Style
     colorama.init(autoreset=True)
 except ImportError:
     print("Por favor instala 'colorama': pip install colorama")
-    # Definir colores 'dummy' si colorama no está
+   
     class DummyColor:
         def __getattr__(self, name):
             return ""
     Fore = DummyColor()
     Style = DummyColor()
 
-# --- Definición de Colores ---
+
 C_RED = Fore.RED + Style.BRIGHT
 C_GREEN = Fore.GREEN + Style.BRIGHT
 C_YELLOW = Fore.YELLOW + Style.BRIGHT
@@ -28,7 +27,6 @@ C_CYAN = Fore.CYAN + Style.BRIGHT
 C_WHITE = Fore.WHITE + Style.BRIGHT
 C_RESET = Style.RESET_ALL
 
-# --- Funciones de Gráficos y Color ---
 
 def get_color_by_percent(percent):
     """Devuelve un color basado en el porcentaje."""
@@ -44,8 +42,6 @@ def create_bar(percent, length=20):
     filled_len = int(length * percent / 100)
     bar = '■' * filled_len + '—' * (length - filled_len)
     return f"{color}[{bar}]{C_RESET} {percent:.1f}%"
-
-# --- Funciones de Red ---
 
 def get_wifi_info():
     """Obtiene el SSID y la fuerza de la señal de la red Wi-Fi."""
@@ -77,7 +73,7 @@ def get_wifi_info():
                 ssid = ssid_match.group(1).strip()
             if signal_match:
                 dbm = int(signal_match.group(1))
-                # Conversión simple de dBm a %
+              
                 if dbm > -50: signal_percent = 100
                 elif dbm > -60: signal_percent = 80
                 elif dbm > -70: signal_percent = 60
@@ -87,11 +83,10 @@ def get_wifi_info():
             ssid = "SO no compatible para Wi-Fi"
 
     except Exception:
-        ssid = "N/A (¿Wi-Fi?)" # Error al ejecutar el comando
+        ssid = "N/A (¿Wi-Fi?)" 
         
     return ssid, signal_percent
 
-# --- Función de Análisis de Riesgos ---
 
 def analyze_risks(metrics):
     """Analiza las métricas y devuelve una lista de riesgos."""
@@ -126,38 +121,26 @@ def analyze_risks(metrics):
         
     return risks
 
-# --- Función Principal ---
-
 def main():
-    # Limpiar pantalla para un efecto "contundente"
+ 
     os.system('cls' if platform.system() == "Windows" else 'clear')
     
     print(f"{C_CYAN}==========================================={C_RESET}")
     print(f"{C_WHITE}--- SysCare: Diagnóstico del Sistema (KINIX) ---{C_RESET}")
     print(f"{C_CYAN}==========================================={C_RESET}\n")
-    
     metrics = {}
-    
-    # --- Métricas del Sistema ---
     print(f"{C_WHITE}Hardware y Almacenamiento:{C_RESET}")
-    
-    # CPU
     cpu_percent = psutil.cpu_percent(interval=1)
     metrics['cpu'] = cpu_percent
     print(f"  Uso de CPU: \t{create_bar(cpu_percent)}")
-    
-    # Memoria (RAM)
     memory = psutil.virtual_memory()
     metrics['ram'] = memory.percent
     print(f"  Uso de RAM: \t{create_bar(memory.percent)} (Total: {memory.total / (1024**3):.2f} GB)")
-    
-    # Disco (partición raíz)
-    # NOTA: Esto solo mira '/', en un sistema real se deberían iterar todas las particiones.
+
     disk = psutil.disk_usage('/')
     metrics['disk'] = disk.percent
     print(f"  Uso de Disco (/): {create_bar(disk.percent)} (Total: {disk.total / (1024**3):.2f} GB)")
-    
-    # --- Métricas de Red ---
+
     print(f"\n{C_WHITE}Conectividad de Red:{C_RESET}")
     
     ssid, signal = get_wifi_info()
@@ -165,12 +148,10 @@ def main():
     print(f"  Red Wi-Fi: \t{C_CYAN}{ssid}{C_RESET}")
     print(f"  Señal Wi-Fi: \t{create_bar(signal)}")
     
-    # --- Información General ---
     print(f"\n{C_WHITE}Información General:{C_RESET}")
     boot_time = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     print(f"  Sistema iniciado: {C_GREEN}{boot_time}{C_RESET}")
-    
-    # --- Análisis de Riesgos ---
+
     print(f"\n{C_RED}===================================={C_RESET}")
     print(f"{C_WHITE}--- Riesgos Encontrados ---{C_RESET}")
     print(f"{C_RED}===================================={C_RESET}\n")
