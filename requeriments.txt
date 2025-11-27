@@ -1,0 +1,12 @@
+python-nmap
+yara-python
+requests
+psutil
+scapy
+exifread
+pypdf
+python-docx
+openpyxl
+colorama
+customtkinter
+pillow
