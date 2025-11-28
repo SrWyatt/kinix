@@ -58,7 +58,7 @@ class GolemWindow(ctk.CTkToplevel):
         super().__init__(parent)
         self.title("KINIX - Golem")
         self.geometry("950x700")
-        self.resizable(False, False)
+        self.resizable(True, True)
         self.configure(fg_color=COLOR_FONDO)
         self.attributes("-topmost", True)
         self.after(200, lambda: self.attributes("-topmost", False))
