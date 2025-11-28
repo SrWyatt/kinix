@@ -50,20 +50,20 @@ class SysCareScanner:
         return m
 
 class MetricCard(ctk.CTkFrame):
-    def __init__(self, parent, title, icon, unit="%", **kwargs):
+    def __init__(self, parent, title, label_icon, unit="%", **kwargs):
         super().__init__(parent, fg_color=COLOR_TARJETA, corner_radius=12, border_width=1, border_color="#2B2B2B", **kwargs)
         self.unit = unit
         header = ctk.CTkFrame(self, fg_color="transparent")
-        header.pack(fill="x", padx=15, pady=(15, 5))
-        ctk.CTkLabel(header, text=icon, font=("Segoe UI Emoji", 24)).pack(side="left")
-        ctk.CTkLabel(header, text=title, font=("Roboto", 14, "bold"), text_color="white").pack(side="left", padx=10)
-        self.lbl_value = ctk.CTkLabel(self, text="--", font=("Roboto", 32, "bold"), text_color=COLOR_ACENTO)
-        self.lbl_value.pack(padx=15, pady=(5, 0), anchor="w")
-        self.progress = ctk.CTkProgressBar(self, height=8)
+        header.pack(fill="x", padx=10, pady=(10, 5))
+        ctk.CTkLabel(header, text=label_icon, font=("Segoe UI Emoji", 20)).pack(side="left")
+        ctk.CTkLabel(header, text=title, font=("Roboto", 12, "bold"), text_color="white").pack(side="left", padx=8)
+        self.lbl_value = ctk.CTkLabel(self, text="--", font=("Roboto", 26, "bold"), text_color=COLOR_ACENTO)
+        self.lbl_value.pack(padx=10, pady=(5, 0), anchor="w")
+        self.progress = ctk.CTkProgressBar(self, height=6)
         self.progress.set(0)
-        self.progress.pack(fill="x", padx=15, pady=(10, 5))
-        self.lbl_sub = ctk.CTkLabel(self, text="...", font=("Roboto", 11), text_color="gray")
-        self.lbl_sub.pack(padx=15, pady=(0, 15), anchor="w")
+        self.progress.pack(fill="x", padx=10, pady=(8, 5))
+        self.lbl_sub = ctk.CTkLabel(self, text="...", font=("Roboto", 10), text_color="gray")
+        self.lbl_sub.pack(padx=10, pady=(0, 10), anchor="w")
 
     def update_data(self, value, max_val, subtext):
         if value is None: value = 0
@@ -80,8 +80,8 @@ class SysCareWindow(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("KINIX - SysCare Monitor")
-        self.geometry("1000x700")
-        self.resizable(False, False)
+        self.geometry("800x600")
+        self.resizable(True, True)
         self.configure(fg_color=COLOR_FONDO)
         self.attributes("-topmost", True)
         self.after(200, lambda: self.attributes("-topmost", False))
@@ -96,20 +96,20 @@ class SysCareWindow(ctk.CTkToplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
-        self.header = ctk.CTkFrame(self, height=80, fg_color=COLOR_HEADER_BG, corner_radius=0)
+        self.header = ctk.CTkFrame(self, height=60, fg_color=COLOR_HEADER_BG, corner_radius=0)
         self.header.grid(row=0, column=0, sticky="ew")
         title_frame = ctk.CTkFrame(self.header, fg_color="transparent")
-        title_frame.pack(side="left", padx=20, pady=20)
-        ctk.CTkLabel(title_frame, text="SysCare", font=("Roboto", 24, "bold"), text_color="white").pack(side="left")
+        title_frame.pack(side="left", padx=15, pady=15)
+        ctk.CTkLabel(title_frame, text="SysCare", font=("Roboto", 20, "bold"), text_color="white").pack(side="left")
         
         try:
-            pil_img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(150, 40))
-            ctk.CTkLabel(self.header, text="", image=pil_img).pack(side="right", padx=20)
+            pil_img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(120, 30))
+            ctk.CTkLabel(self.header, text="", image=pil_img).pack(side="right", padx=15)
         except: pass
 
         self.control_bar = ctk.CTkFrame(self, fg_color="transparent")
-        self.control_bar.grid(row=1, column=0, sticky="ew", padx=30, pady=(20, 10))
-        self.lbl_status = ctk.CTkLabel(self.control_bar, text="ESTADO: EN ESPERA", font=("Roboto", 12, "bold"), text_color="gray")
+        self.control_bar.grid(row=1, column=0, sticky="ew", padx=20, pady=(15, 10))
+        self.lbl_status = ctk.CTkLabel(self.control_bar, text="ESTADO: EN ESPERA", font=("Roboto", 11, "bold"), text_color="gray")
         self.lbl_status.pack(side="left")
 
         self.switch_var = ctk.StringVar(value="off")
@@ -117,36 +117,35 @@ class SysCareWindow(ctk.CTkToplevel):
                                             variable=self.switch_var, onvalue="on", offvalue="off", progress_color=COLOR_ACENTO)
         self.switch_monitor.pack(side="right")
         
-        self.btn_clean = ctk.CTkButton(self.control_bar, text="OPTIMIZAR RAM", width=120, fg_color="#2B2B2B", hover_color="#4CAF50", command=self.clean_ram)
-        self.btn_clean.pack(side="right", padx=15)
+        self.btn_clean = ctk.CTkButton(self.control_bar, text="OPTIMIZAR RAM", width=100, fg_color="#2B2B2B", hover_color="#4CAF50", command=self.clean_ram)
+        self.btn_clean.pack(side="right", padx=10)
 
-        self.btn_log = ctk.CTkButton(self.control_bar, text="GUARDAR LOG", width=120, fg_color="#2B2B2B", hover_color="#3A3A3A", command=self.save_log)
+        self.btn_log = ctk.CTkButton(self.control_bar, text="GUARDAR LOG", width=100, fg_color="#2B2B2B", hover_color="#3A3A3A", command=self.save_log)
         self.btn_log.pack(side="right", padx=5)
 
-        self.dash_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.dash_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        self.dash_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.dash_frame.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
         self.dash_frame.grid_columnconfigure((0, 1), weight=1)
-        self.dash_frame.grid_rowconfigure((0, 1), weight=0)
 
         self.card_cpu = MetricCard(self.dash_frame, "CPU", "💾", unit="%")
-        self.card_cpu.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self.card_cpu.grid(row=0, column=0, padx=8, pady=8, sticky="nsew")
         self.card_ram = MetricCard(self.dash_frame, "Memoria", "🧠", unit="%")
-        self.card_ram.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        self.card_ram.grid(row=0, column=1, padx=8, pady=8, sticky="nsew")
         self.card_disk = MetricCard(self.dash_frame, "Disco", "💿", unit="%")
-        self.card_disk.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.card_disk.grid(row=1, column=0, padx=8, pady=8, sticky="nsew")
         
         self.card_sys = ctk.CTkFrame(self.dash_frame, fg_color=COLOR_TARJETA, corner_radius=12, border_width=1, border_color="#2B2B2B")
-        self.card_sys.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        self.card_sys.grid(row=1, column=1, padx=8, pady=8, sticky="nsew")
         
-        ctk.CTkLabel(self.card_sys, text="Información del Sistema", font=("Roboto", 14, "bold"), text_color="white").pack(pady=15)
+        ctk.CTkLabel(self.card_sys, text="Informacion del Sistema", font=("Roboto", 13, "bold"), text_color="white").pack(pady=10)
         
-        self.lbl_os = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 12))
+        self.lbl_os = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 11))
         self.lbl_os.pack(pady=2)
         
-        self.lbl_boot = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 12))
+        self.lbl_boot = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 11))
         self.lbl_boot.pack(pady=2)
         
-        self.lbl_procs = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 12))
+        self.lbl_procs = ctk.CTkLabel(self.card_sys, text="...", text_color="gray", font=("Consolas", 11))
         self.lbl_procs.pack(pady=2)
 
         self.run_once()

@@ -49,7 +49,6 @@ class DocScanner:
         }
         
         try:
-            # 1. Análisis de Bytes (Entropía y Magic)
             with open(p, 'rb') as f:
                 d = f.read()
                 if d:
@@ -64,7 +63,6 @@ class DocScanner:
                 r["magic_check"] = self.check_magic(header, ext)
         except: pass
 
-        # 2. Análisis YARA
         if ENG_OK:
             try:
                 c = yara.compile(source=RULES)
@@ -74,7 +72,6 @@ class DocScanner:
                     r["hit"] = [x.rule for x in m]
             except: pass
         
-        # 3. Extracción Profunda de Metadatos
         self.extract_metadata(p, r)
         return r
 
@@ -85,7 +82,6 @@ class DocScanner:
         return True
 
     def extract_metadata(self, p, r):
-        # Datos básicos del sistema
         try:
             s = os.stat(p)
             sz = s.st_size
@@ -93,7 +89,6 @@ class DocScanner:
             elif sz < 1024**2: r["summary"]["Size"] = f"{sz/1024:.2f} KB"
             else: r["summary"]["Size"] = f"{sz/(1024**2):.2f} MB"
             
-            # Fecha de modificación como fallback
             dt = datetime.datetime.fromtimestamp(s.st_mtime)
             r["summary"]["Date"] = dt.strftime("%Y-%m-%d %H:%M")
             r["raw_meta"]["System Modified"] = str(dt)
@@ -111,10 +106,9 @@ class DocScanner:
             with open(p, 'rb') as f:
                 tags = exifread.process_file(f, details=True)
                 for k, v in tags.items():
-                    if k == "JPEGThumbnail": continue # Ignorar binario
+                    if k == "JPEGThumbnail": continue
                     r["raw_meta"][k] = str(v)
                     
-                    # Mapeo al Dashboard
                     k_lo = k.lower()
                     val = str(v)
                     if "image artist" in k_lo or "xpauthor" in k_lo: r["summary"]["Author"] = val
@@ -122,7 +116,6 @@ class DocScanner:
                     if "model" in k_lo: r["summary"]["Device"] = val
                     if "datetime" in k_lo and "original" in k_lo: r["summary"]["Date"] = val
                     
-                    # Detección simple de GPS
                     if "gps latitude" in k_lo:
                         r["summary"]["Location"] = "Datos GPS Detectados"
         except: pass
@@ -149,7 +142,6 @@ class DocScanner:
                 r["summary"]["Author"] = cp.author or "N/A"
                 r["summary"]["Date"] = str(cp.modified) or str(cp.created)
                 r["summary"]["Software"] = "Microsoft Word / OpenXML"
-                # Dump de todo lo que haya
                 attrs = ["author", "category", "comments", "content_status", "created", "identifier", "keywords", "language", "last_modified_by", "modified", "revision", "subject", "title", "version"]
                 for a in attrs:
                     val = getattr(cp, a, None)
@@ -168,19 +160,18 @@ class DocScanner:
         except: pass
 
 class MetaCard(ctk.CTkFrame):
-    def __init__(self, parent, icon, title, value, color=COLOR_ACENTO):
-        super().__init__(parent, fg_color=COLOR_TARJETA, corner_radius=10, border_width=1, border_color="#2B2B2B")
-        self.icon_lbl = ctk.CTkLabel(self, text=icon, font=("Segoe UI Emoji", 20))
-        self.icon_lbl.pack(side="left", padx=(15, 10), pady=15)
+    def __init__(self, parent, icon_text, title, value, color=COLOR_ACENTO):
+        super().__init__(parent, fg_color=COLOR_TARJETA, corner_radius=8, border_width=1, border_color="#2B2B2B")
+        self.icon_lbl = ctk.CTkLabel(self, text=icon_text, font=("Segoe UI Emoji", 20), text_color="white")
+        self.icon_lbl.pack(side="left", padx=(12, 8), pady=12)
         
         self.data_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.data_frame.pack(side="left", fill="both", expand=True, pady=5)
         
-        self.lbl_title = ctk.CTkLabel(self.data_frame, text=title, font=("Roboto", 10, "bold"), text_color="gray", anchor="w")
+        self.lbl_title = ctk.CTkLabel(self.data_frame, text=title, font=("Roboto", 9, "bold"), text_color="gray", anchor="w")
         self.lbl_title.pack(fill="x")
         
-        # Ajuste de tamaño de fuente si el texto es muy largo
-        f_size = 13 if len(str(value)) < 18 else 10
+        f_size = 11 if len(str(value)) < 18 else 9
         self.lbl_val = ctk.CTkLabel(self.data_frame, text=str(value), font=("Roboto", f_size, "bold"), text_color=color, anchor="w")
         self.lbl_val.pack(fill="x")
 
@@ -188,7 +179,8 @@ class SecureDocsWindow(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("KINIX - SecureDocs Forensic")
-        self.geometry("1000x800")
+        self.geometry("800x600")
+        self.resizable(True, True)
         self.configure(fg_color=COLOR_FONDO)
         self.attributes("-topmost", True)
         self.after(200, lambda: self.attributes("-topmost", False))
@@ -202,37 +194,33 @@ class SecureDocsWindow(ctk.CTkToplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # Header
-        self.head = ctk.CTkFrame(self, height=80, fg_color=COLOR_HEADER_BG)
+        self.head = ctk.CTkFrame(self, height=60, fg_color=COLOR_HEADER_BG)
         self.head.grid(row=0, column=0, sticky="ew")
         tf = ctk.CTkFrame(self.head, fg_color="transparent")
-        tf.pack(side="left", padx=20, pady=20)
-        ctk.CTkLabel(tf, text="SecureDocs", font=("Roboto", 24, "bold"), text_color="white").pack(side="left")
-        ctk.CTkLabel(tf, text="| Análisis de Metadatos", font=("Roboto", 14), text_color=COLOR_ACENTO).pack(side="left", padx=10)
+        tf.pack(side="left", padx=15, pady=15)
+        ctk.CTkLabel(tf, text="SecureDocs", font=("Roboto", 20, "bold"), text_color="white").pack(side="left")
+        ctk.CTkLabel(tf, text="| Analisis de Metadatos", font=("Roboto", 12), text_color=COLOR_ACENTO).pack(side="left", padx=10)
         
         try:
-            img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(150, 40))
-            ctk.CTkLabel(self.head, text="", image=img).pack(side="right", padx=20)
+            img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(120, 30))
+            ctk.CTkLabel(self.head, text="", image=img).pack(side="right", padx=15)
         except: pass
         
-        # Main Scroll
         self.scr = ctk.CTkScrollableFrame(self, fg_color="#121213")
-        self.scr.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+        self.scr.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
         
-        # Estado inicial
         self.empty_state()
 
-        # Footer Actions
-        self.ft = ctk.CTkFrame(self, height=80, fg_color="#1F1F21")
+        self.ft = ctk.CTkFrame(self, height=70, fg_color="#1F1F21")
         self.ft.grid(row=2, column=0, sticky="ew")
-        self.btn = ctk.CTkButton(self.ft, text="SELECCIONAR ARCHIVO", fg_color=COLOR_ACENTO, width=200, command=self.sel)
-        self.btn.pack(side="left", padx=30, pady=20)
-        self.btn_s = ctk.CTkButton(self.ft, text="EXPORTAR JSON", fg_color="#2B2B2B", width=150, command=self.save)
-        self.btn_s.pack(side="right", padx=30, pady=20)
+        self.btn = ctk.CTkButton(self.ft, text="SELECCIONAR ARCHIVO", fg_color=COLOR_ACENTO, width=180, command=self.sel)
+        self.btn.pack(side="left", padx=20, pady=15)
+        self.btn_s = ctk.CTkButton(self.ft, text="EXPORTAR JSON", fg_color="#2B2B2B", width=140, command=self.save)
+        self.btn_s.pack(side="right", padx=20, pady=15)
 
     def empty_state(self):
-        self.lbl_empty = ctk.CTkLabel(self.scr, text="📂\nArrastre un archivo o haga clic en Seleccionar\npara extraer metadatos forenses.", font=("Roboto", 16), text_color="gray")
-        self.lbl_empty.pack(pady=150)
+        self.lbl_empty = ctk.CTkLabel(self.scr, text="📂\nArrastre un archivo o haga clic en Seleccionar\npara extraer metadatos forenses.", font=("Roboto", 14), text_color="gray")
+        self.lbl_empty.pack(pady=100)
 
     def sel(self):
         p = filedialog.askopenfilename()
@@ -244,59 +232,53 @@ class SecureDocsWindow(ctk.CTkToplevel):
         r = self.eng.scan(p)
         self.cache = r
         
-        # 1. STATUS HEADER
         self.draw_status_header(r, p)
 
-        # 2. MINI DASHBOARD (Key Insights)
-        ctk.CTkLabel(self.scr, text="RESUMEN CLAVE", font=("Roboto", 12, "bold"), text_color="gray").pack(anchor="w", pady=(20, 10))
+        ctk.CTkLabel(self.scr, text="RESUMEN CLAVE", font=("Roboto", 11, "bold"), text_color="gray").pack(anchor="w", pady=(15, 5))
         self.draw_dashboard(r["summary"])
 
-        # 3. RAW DATA LIST
-        ctk.CTkLabel(self.scr, text=f"METADATOS RAW ({len(r['raw_meta'])})", font=("Roboto", 12, "bold"), text_color="gray").pack(anchor="w", pady=(30, 10))
+        ctk.CTkLabel(self.scr, text=f"METADATOS RAW ({len(r['raw_meta'])})", font=("Roboto", 11, "bold"), text_color="gray").pack(anchor="w", pady=(20, 5))
         self.draw_raw_list(r["raw_meta"])
 
     def draw_status_header(self, r, path):
-        # Color logic
         is_safe = r["safe"] and r["magic_check"]
         c = COLOR_SAFE if is_safe else COLOR_DANGER
-        t = "INTEGRIDAD VERIFICADA" if is_safe else "POSIBLE ANOMALÍA"
+        t = "INTEGRIDAD VERIFICADA" if is_safe else "POSIBLE ANOMALIA"
         
         status_fr = ctk.CTkFrame(self.scr, fg_color=c, corner_radius=8)
         status_fr.pack(fill="x", pady=(0, 10))
         
         top = ctk.CTkFrame(status_fr, fg_color="transparent")
-        top.pack(fill="x", padx=15, pady=10)
-        ctk.CTkLabel(top, text=t, font=("Roboto", 18, "bold"), text_color="white").pack(side="left")
-        ctk.CTkLabel(top, text=f"Entropía: {r['ent']}", font=("Consolas", 12, "bold"), text_color="white").pack(side="right")
+        top.pack(fill="x", padx=10, pady=8)
+        ctk.CTkLabel(top, text=t, font=("Roboto", 16, "bold"), text_color="white").pack(side="left")
+        ctk.CTkLabel(top, text=f"Entropia: {r['ent']}", font=("Consolas", 11, "bold"), text_color="white").pack(side="right")
         
-        ctk.CTkLabel(status_fr, text=os.path.basename(path), text_color="white", font=("Roboto", 12)).pack(padx=15, pady=(0, 10), anchor="w")
+        ctk.CTkLabel(status_fr, text=os.path.basename(path), text_color="white", font=("Roboto", 11)).pack(padx=10, pady=(0, 8), anchor="w")
 
         if not r["magic_check"]:
             err_fr = ctk.CTkFrame(self.scr, fg_color="#2B2B2B", border_color=COLOR_WARN, border_width=1)
             err_fr.pack(fill="x", pady=5)
-            ctk.CTkLabel(err_fr, text="⚠️ ALERTA DE MAGIC BYTES: La extensión del archivo no coincide con su firma hexadecimal real.", text_color=COLOR_WARN).pack(pady=5)
+            ctk.CTkLabel(err_fr, text="⚠️ ALERTA DE MAGIC BYTES: La extension no coincide con su firma.", text_color=COLOR_WARN).pack(pady=5)
 
     def draw_dashboard(self, s):
         grid = ctk.CTkFrame(self.scr, fg_color="transparent")
         grid.pack(fill="x")
         grid.grid_columnconfigure((0, 1, 2), weight=1)
         
-        # Fila 1
-        MetaCard(grid, "👤", "AUTOR", s["Author"]).grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-        MetaCard(grid, "📅", "FECHA / HORA", s["Date"]).grid(row=0, column=1, sticky="ew", padx=5, pady=5)
-        MetaCard(grid, "💾", "TAMAÑO", s["Size"]).grid(row=0, column=2, sticky="ew", padx=5, pady=5)
+        MetaCard(grid, "👤", "AUTOR", s["Author"]).grid(row=0, column=0, sticky="ew", padx=4, pady=4)
+        MetaCard(grid, "📅", "FECHA / HORA", s["Date"]).grid(row=0, column=1, sticky="ew", padx=4, pady=4)
+        MetaCard(grid, "💾", "TAMANO", s["Size"]).grid(row=0, column=2, sticky="ew", padx=4, pady=4)
         
-        # Fila 2
-        MetaCard(grid, "📍", "LOCACIÓN", s["Location"], color=COLOR_WARN if s["Location"] != "N/A" else "gray").grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-        MetaCard(grid, "💻", "SOFTWARE", s["Software"]).grid(row=1, column=1, sticky="ew", padx=5, pady=5)
-        MetaCard(grid, "📷", "DISPOSITIVO", s["Device"]).grid(row=1, column=2, sticky="ew", padx=5, pady=5)
+        MetaCard(grid, "📍", "LOCACION", s["Location"], color=COLOR_WARN if s["Location"] != "N/A" else "gray").grid(row=1, column=0, sticky="ew", padx=4, pady=4)
+        MetaCard(grid, "💻", "SOFTWARE", s["Software"]).grid(row=1, column=1, sticky="ew", padx=4, pady=4)
+        MetaCard(grid, "📷", "DISPOSITIVO", s["Device"]).grid(row=1, column=2, sticky="ew", padx=4, pady=4)
 
     def draw_raw_list(self, raw):
         list_fr = ctk.CTkFrame(self.scr, fg_color=COLOR_TARJETA)
         list_fr.pack(fill="x")
         
         if not raw:
-            ctk.CTkLabel(list_fr, text="No se encontraron metadatos adicionales.", text_color="gray").pack(pady=20)
+            ctk.CTkLabel(list_fr, text="No se encontraron metadatos adicionales.", text_color="gray").pack(pady=15)
             return
 
         i = 0
@@ -305,13 +287,11 @@ class SecureDocsWindow(ctk.CTkToplevel):
             row = ctk.CTkFrame(list_fr, fg_color=bg, corner_radius=0)
             row.pack(fill="x")
             
-            # Key (Truncada)
             k_txt = (k[:30] + '..') if len(k) > 30 else k
-            ctk.CTkLabel(row, text=k_txt, width=200, anchor="w", font=("Consolas", 11), text_color=COLOR_ACENTO).pack(side="left", padx=10, pady=2)
+            ctk.CTkLabel(row, text=k_txt, width=180, anchor="w", font=("Consolas", 10), text_color=COLOR_ACENTO).pack(side="left", padx=8, pady=2)
             
-            # Value (Truncado)
             v_txt = (v[:80] + '...') if len(v) > 80 else v
-            ctk.CTkLabel(row, text=v_txt, anchor="w", font=("Roboto", 11), text_color="#DDD").pack(side="left", padx=10, pady=2)
+            ctk.CTkLabel(row, text=v_txt, anchor="w", font=("Roboto", 10), text_color="#DDD").pack(side="left", padx=8, pady=2)
             i += 1
 
     def save(self):
@@ -320,5 +300,5 @@ class SecureDocsWindow(ctk.CTkToplevel):
         if not os.path.exists(d): os.makedirs(d)
         n = f"forensic_report_{datetime.datetime.now().strftime('%d%m%Y_%H%M%S')}.json"
         with open(os.path.join(d, n), "w") as f: json.dump(self.cache, f, indent=4, default=str)
-        self.btn_s.configure(text="EXPORTADO ✅", fg_color="#00E676")
+        self.btn_s.configure(text="EXPORTADO OK", fg_color="#00E676")
         self.after(2000, lambda: self.btn_s.configure(text="EXPORTAR JSON", fg_color="#2B2B2B"))

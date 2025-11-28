@@ -41,7 +41,8 @@ class SmartBiosWindow(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("KINIX - SmartBios")
-        self.geometry("800x600")
+        self.geometry("700x500")
+        self.resizable(True, True)
         self.configure(fg_color=COLOR_FONDO)
         self.attributes("-topmost", True)
         self.after(200, lambda: self.attributes("-topmost", False))
@@ -54,32 +55,32 @@ class SmartBiosWindow(ctk.CTkToplevel):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
-        self.header = ctk.CTkFrame(self, height=80, fg_color=COLOR_HEADER_BG)
+        self.header = ctk.CTkFrame(self, height=60, fg_color=COLOR_HEADER_BG)
         self.header.grid(row=0, column=0, sticky="ew")
         tf = ctk.CTkFrame(self.header, fg_color="transparent")
-        tf.pack(side="left", padx=20, pady=20)
-        ctk.CTkLabel(tf, text="SmartBios", font=("Roboto", 24, "bold"), text_color="white").pack(side="left")
+        tf.pack(side="left", padx=15, pady=15)
+        ctk.CTkLabel(tf, text="SmartBios", font=("Roboto", 20, "bold"), text_color="white").pack(side="left")
         try:
-            pil_img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(150, 40))
-            ctk.CTkLabel(self.header, text="", image=pil_img).pack(side="right", padx=20)
+            pil_img = ctk.CTkImage(light_image=Image.open("resc/logo h.png"), dark_image=Image.open("resc/logo h.png"), size=(120, 30))
+            ctk.CTkLabel(self.header, text="", image=pil_img).pack(side="right", padx=15)
         except: pass
 
         self.status_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.status_frame.grid(row=1, column=0, sticky="ew", padx=40, pady=30)
-        self.card = ctk.CTkFrame(self.status_frame, fg_color=COLOR_TARJETA, corner_radius=15, border_width=2)
-        self.card.pack(fill="x", ipady=20)
+        self.status_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=25)
+        self.card = ctk.CTkFrame(self.status_frame, fg_color=COLOR_TARJETA, corner_radius=12, border_width=2)
+        self.card.pack(fill="x", ipady=15)
         
-        self.icon = ctk.CTkLabel(self.card, text="🛡️", font=("Segoe UI Emoji", 60))
-        self.icon.pack(pady=10)
-        self.lbl_main = ctk.CTkLabel(self.card, text="Esperando Análisis", font=("Roboto", 24, "bold"))
+        self.icon = ctk.CTkLabel(self.card, text="🛡️", font=("Segoe UI Emoji", 50))
+        self.icon.pack(pady=8)
+        self.lbl_main = ctk.CTkLabel(self.card, text="Esperando Analisis", font=("Roboto", 22, "bold"))
         self.lbl_main.pack()
         self.lbl_ver = ctk.CTkLabel(self.card, text="", text_color="gray")
-        self.lbl_ver.pack(pady=5)
+        self.lbl_ver.pack(pady=4)
         self.lbl_board = ctk.CTkLabel(self.card, text="", text_color="gray")
         self.lbl_board.pack()
 
-        self.btn = ctk.CTkButton(self, text="VERIFICAR FIRMWARE", fg_color=COLOR_ACENTO, width=200, command=self.run)
-        self.btn.grid(row=2, column=0, pady=20)
+        self.btn = ctk.CTkButton(self, text="VERIFICAR FIRMWARE", fg_color=COLOR_ACENTO, width=180, command=self.run)
+        self.btn.grid(row=2, column=0, pady=15)
 
     def run(self):
         self.btn.configure(state="disabled")
@@ -95,5 +96,5 @@ class SmartBiosWindow(ctk.CTkToplevel):
         t = "SECURE BOOT ACTIVADO" if res["sb"] == "true" else "SECURE BOOT DESACTIVADO"
         self.card.configure(border_color=c)
         self.lbl_main.configure(text=t, text_color=c)
-        self.lbl_ver.configure(text=f"Versión BIOS: {res['bios_ver']}")
+        self.lbl_ver.configure(text=f"Version BIOS: {res['bios_ver']}")
         self.lbl_board.configure(text=f"Placa Base: {res['board']}")
